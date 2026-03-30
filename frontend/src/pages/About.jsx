@@ -8,6 +8,33 @@ const steps = [
   { n: 5, title: 'Track Over Time', desc: 'The dashboard plots score trends across runs, ranks models by average score and pass rate, and lets you do side-by-side comparisons of any two runs.' },
 ]
 
+const useCases = [
+  {
+    title: 'Customer Support Teams',
+    desc: 'Test whether your support bot gives accurate, empathetic answers to billing questions, refund requests, and escalations — before it talks to real customers.',
+  },
+  {
+    title: 'Product Teams Shipping AI Features',
+    desc: 'Before you swap in a new model or tweak a prompt, run it against your test suite and see exactly which cases got better or worse. No more guessing.',
+  },
+  {
+    title: 'Content & Marketing',
+    desc: 'Evaluate whether AI-generated copy matches your brand tone, stays on-message, and hits the right length — across dozens of prompts at once.',
+  },
+  {
+    title: 'Legal & Compliance',
+    desc: 'Check that an LLM summarizing contracts or policies consistently surfaces the right clauses and never hallucinates terms that aren\'t there.',
+  },
+  {
+    title: 'Education & Tutoring Apps',
+    desc: 'Verify that an AI tutor explains concepts accurately, adjusts for grade level, and doesn\'t introduce errors — tested against a rubric before students see it.',
+  },
+  {
+    title: 'Any Team Choosing Between Models',
+    desc: 'Running the same task through a cheaper model and an expensive one? EvalBoard shows you the score difference per test case so the cost/quality tradeoff is concrete, not a gut feeling.',
+  },
+]
+
 const achievements = [
   'Runs all test cases in parallel using asyncio with configurable concurrency',
   'Streams live results to the browser via SSE as each case completes',
@@ -71,6 +98,22 @@ export default function About() {
                 <div className="text-sm font-semibold text-gray-800 dark:text-gray-200 mt-1">{step.title}</div>
                 <div className="text-sm text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">{step.desc}</div>
               </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Where This Gets Used */}
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold">Where This Gets Used</h2>
+        <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+          Any team using AI to generate text has the same problem: you don't know if it's actually good until something goes wrong. EvalBoard makes quality measurable before that happens.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {useCases.map(({ title, desc }) => (
+            <div key={title} className="rounded-xl border border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 p-4">
+              <div className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-1">{title}</div>
+              <div className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">{desc}</div>
             </div>
           ))}
         </div>

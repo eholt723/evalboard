@@ -44,8 +44,11 @@ export default function Layout({ children }) {
         {children}
       </main>
 
-      <footer className="border-t border-gray-200 dark:border-gray-800 text-center text-xs text-gray-400 dark:text-gray-600 py-4 mt-12">
+      <footer className="relative border-t border-gray-200 dark:border-gray-800 text-center text-xs text-gray-400 dark:text-gray-600 py-4 mt-12">
         EvalBoard — LLM Evaluation Dashboard
+        <span className="fixed bottom-3 right-4 text-right text-xs text-gray-400 dark:text-gray-600 pointer-events-none select-none">
+          Created by Eric Holt
+        </span>
       </footer>
     </div>
   )
