@@ -12,7 +12,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 load_dotenv(Path(__file__).resolve().parents[1] / ".env")
 
-from app.db.database import Base
+from app.db.base import Base
 import app.models  # noqa: F401 — registers all models
 
 config = context.config
