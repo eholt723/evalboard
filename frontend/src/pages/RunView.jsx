@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { getRun } from '../lib/api'
 
@@ -26,20 +26,7 @@ export default function RunView() {
   const [expanded, setExpanded] = useState({})
   const esRef = useRef(null)
 
-  useEffect(() => {
-    getRun(id).then(r => {
-      setRun(r)
-      if (r.status === 'completed') {
-        setLiveResults(r.results || [])
-        setSummary(r.summary)
-      } else if (r.status === 'running' || r.status === 'pending') {
-        startStream()
-      }
-    })
-    return () => esRef.current?.close()
-  }, [id])
-
-  const startStream = () => {
+  const startStream = useCallback(() => {
     setStreaming(true)
     const es = new EventSource(`/api/runs/${id}/stream`)
     esRef.current = es
@@ -67,7 +54,20 @@ export default function RunView() {
       }
     }
     es.onerror = () => { setStreaming(false); es.close() }
-  }
+  }, [id])
+
+  useEffect(() => {
+    getRun(id).then(r => {
+      setRun(r)
+      if (r.status === 'completed') {
+        setLiveResults(r.results || [])
+        setSummary(r.summary)
+      } else if (r.status === 'running' || r.status === 'pending') {
+        startStream()
+      }
+    })
+    return () => esRef.current?.close()
+  }, [id, startStream])
 
   const toggle = (id) => setExpanded(e => ({ ...e, [id]: !e[id] }))
 
