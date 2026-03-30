@@ -1,6 +1,8 @@
 import asyncio
 import time
+from collections.abc import Callable, Coroutine
 from datetime import datetime, timezone
+from typing import Any
 
 from groq import AsyncGroq
 from sqlalchemy import select
@@ -14,18 +16,18 @@ from app.models.run import Run, RunResult, RunSummary
 
 CONCURRENCY = 5  # max parallel Groq inference calls per run
 
+Publish = Callable[[dict], Coroutine[Any, Any, None]]
 
-async def execute_run(run_id: int, db: AsyncSession, event_queue: asyncio.Queue) -> None:
+
+async def execute_run(run_id: int, db: AsyncSession, publish: Publish) -> None:
     result = await db.execute(select(Run).where(Run.id == run_id))
     run = result.scalar_one()
 
-    # load test cases
     cases_result = await db.execute(
         select(TestCase).where(TestCase.suite_id == run.suite_id).order_by(TestCase.id)
     )
     cases = cases_result.scalars().all()
 
-    # load system prompt if variant specified
     system_prompt = None
     if run.prompt_variant_id:
         pv_result = await db.execute(
@@ -90,7 +92,7 @@ async def execute_run(run_id: int, db: AsyncSession, event_queue: asyncio.Queue)
             await db.commit()
             await db.refresh(run_result)
 
-            await event_queue.put({
+            await publish({
                 "type": "result",
                 "index": index,
                 "total": len(cases),
@@ -103,7 +105,6 @@ async def execute_run(run_id: int, db: AsyncSession, event_queue: asyncio.Queue)
 
     await asyncio.gather(*[run_single_case(case, i + 1) for i, case in enumerate(cases)])
 
-    # compute summary
     results_query = await db.execute(
         select(RunResult).where(RunResult.run_id == run_id)
     )
@@ -126,7 +127,7 @@ async def execute_run(run_id: int, db: AsyncSession, event_queue: asyncio.Queue)
     run.completed_at = datetime.now(timezone.utc)
     await db.commit()
 
-    await event_queue.put({
+    await publish({
         "type": "complete",
         "avg_score": avg_score,
         "pass_rate": pass_rate,
