@@ -37,7 +37,7 @@ jobs:
         run: pytest
         env:
           GROQ_API_KEY: placeholder
-          DATABASE_URL: "sqlite+aiosqlite:///:memory:"
+          DATABASE_URL: postgresql+asyncpg://user:pass@localhost/testdb
 
   frontend:
     name: Frontend lint + build
