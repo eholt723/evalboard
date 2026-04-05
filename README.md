@@ -1,3 +1,10 @@
+---
+title: EvalBoard
+sdk: docker
+app_port: 7860
+pinned: false
+---
+
 # EvalBoard
 
 LLM evaluation and prompt testing dashboard. Define test cases with inputs, expected outputs, and scoring criteria — then run them against one or more Groq models simultaneously. Results are scored by an LLM-as-judge and stream live to the UI via SSE. Track pass rates and score trends over time.
