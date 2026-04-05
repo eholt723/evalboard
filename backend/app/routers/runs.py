@@ -77,7 +77,13 @@ async def create_run(
     )
     db.add(run)
     await db.commit()
-    await db.refresh(run)
+
+    # Re-fetch with selectinload so Pydantic doesn't trigger a lazy load on
+    # the summary relationship (which raises MissingGreenlet in async context).
+    result = await db.execute(
+        select(Run).where(Run.id == run.id).options(selectinload(Run.summary))
+    )
+    run = result.scalar_one()
 
     background_tasks.add_task(_run_with_new_session, run.id)
     return run
