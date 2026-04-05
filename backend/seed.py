@@ -14,6 +14,7 @@ from sqlalchemy import select
 from app.db.database import AsyncSessionLocal
 from app.engine.runner import execute_run
 from app.models.case import TestCase
+from app.models.prompt import PromptVariant
 from app.models.run import Run
 from app.models.suite import TestSuite
 
@@ -273,6 +274,43 @@ SUITES = [
 
 MODELS = ["llama-3.1-8b-instant", "llama-3.3-70b-versatile"]
 
+PROMPT_VARIANTS = [
+    {
+        "name": "Customer Service Expert",
+        "system_prompt": (
+            "You are a senior customer service representative with 10 years of experience at a "
+            "leading e-commerce company. Handle every interaction with empathy and a solution-first "
+            "mindset. Always acknowledge the customer's frustration before providing a resolution, "
+            "and give specific next steps rather than vague reassurances. Be concise and professional."
+        ),
+    },
+    {
+        "name": "Strict Code Reviewer",
+        "system_prompt": (
+            "You are a senior software engineer specializing in security and performance. When reviewing "
+            "code, prioritize: (1) security vulnerabilities such as injection attacks and hardcoded "
+            "secrets, (2) resource management issues like unclosed handles and memory leaks, "
+            "(3) correctness and missing error handling, (4) algorithmic complexity and performance. "
+            "Always explain why each issue matters and provide a corrected code example."
+        ),
+    },
+]
+
+
+async def seed_prompt_variants() -> None:
+    """Create demo prompt variants if they don't already exist."""
+    async with AsyncSessionLocal() as db:
+        for pv_data in PROMPT_VARIANTS:
+            result = await db.execute(
+                select(PromptVariant).where(PromptVariant.name == pv_data["name"])
+            )
+            if result.scalar_one_or_none():
+                print(f"  skip (exists): {pv_data['name']}")
+                continue
+            db.add(PromptVariant(name=pv_data["name"], system_prompt=pv_data["system_prompt"]))
+            await db.commit()
+            print(f"  created: {pv_data['name']}")
+
 
 async def seed_suites() -> list[int]:
     """Create suites and cases if they don't exist. Returns suite IDs in SUITES order."""
@@ -336,7 +374,10 @@ async def seed_runs(suite_ids: list[int]) -> None:
 
 
 async def main() -> None:
-    print("--- suites and test cases ---")
+    print("--- prompt variants ---")
+    await seed_prompt_variants()
+
+    print("\n--- suites and test cases ---")
     suite_ids = await seed_suites()
 
     print("\n--- runs (calls Groq — takes a few minutes) ---")

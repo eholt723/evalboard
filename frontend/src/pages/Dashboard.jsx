@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts'
-import { getRecentRuns, getScoreTrends, getLeaderboard, getPassRateBySuite } from '../lib/api'
+import { getRecentRuns, getScoreTrends, getLeaderboard, getPassRateBySuite, getSuites, createRun } from '../lib/api'
 
 function ScoreBadge({ score }) {
   if (score == null) return <span className="text-gray-400 text-xs">—</span>
@@ -22,22 +22,58 @@ const MODEL_COLORS = {
 }
 const FALLBACK_COLORS = ['#06b6d4', '#8b5cf6', '#f59e0b', '#10b981']
 
+const QUICK_STARTS = [
+  {
+    label: 'Customer Support — Llama 8B',
+    suite: 'Customer Support Quality',
+    model: 'llama-3.1-8b-instant',
+    description: '8 customer service scenarios scored live against the smaller model',
+  },
+  {
+    label: 'Customer Support — Llama 70B',
+    suite: 'Customer Support Quality',
+    model: 'llama-3.3-70b-versatile',
+    description: 'Same 8 cases against the 70B — watch the score gap open up',
+  },
+  {
+    label: 'Code Review — Llama 70B',
+    suite: 'Code Review Accuracy',
+    model: 'llama-3.3-70b-versatile',
+    description: 'SQL injection, resource leaks, hardcoded secrets — does it catch them?',
+  },
+]
+
 export default function Dashboard() {
+  const navigate = useNavigate()
   const [runs, setRuns] = useState([])
   const [trends, setTrends] = useState([])
   const [leaderboard, setLeaderboard] = useState([])
   const [passBySuite, setPassBySuite] = useState([])
+  const [suites, setSuites] = useState([])
   const [loading, setLoading] = useState(true)
+  const [launching, setLaunching] = useState({})
 
   useEffect(() => {
-    Promise.all([getRecentRuns(), getScoreTrends(), getLeaderboard(), getPassRateBySuite()])
-      .then(([r, t, l, p]) => { setRuns(r); setTrends(t); setLeaderboard(l); setPassBySuite(p) })
+    Promise.all([getRecentRuns(), getScoreTrends(), getLeaderboard(), getPassRateBySuite(), getSuites()])
+      .then(([r, t, l, p, s]) => { setRuns(r); setTrends(t); setLeaderboard(l); setPassBySuite(p); setSuites(s) })
       .finally(() => setLoading(false))
   }, [])
 
+  const handleQuickStart = async (qs) => {
+    setLaunching(prev => ({ ...prev, [qs.label]: true }))
+    try {
+      const suite = suites.find(s => s.name === qs.suite)
+      if (!suite) throw new Error(`Suite "${qs.suite}" not found — run seed.py to load demo data`)
+      const run = await createRun({ suite_id: suite.id, model_name: qs.model })
+      navigate(`/run/${run.id}`)
+    } catch (e) {
+      alert(e.message)
+      setLaunching(prev => ({ ...prev, [qs.label]: false }))
+    }
+  }
+
   const models = [...new Set(trends.map(t => t.model_name))]
 
-  // pivot trends into recharts format: [{date, model_a_score, model_b_score}]
   const chartData = (() => {
     const byDate = {}
     trends.forEach(t => {
@@ -57,6 +93,34 @@ export default function Dashboard() {
         <Link to="/suites" className="bg-cyan-600 hover:bg-cyan-500 text-white text-sm px-3 py-1.5 rounded-lg transition-colors">
           New Run
         </Link>
+      </div>
+
+      {/* Quick Start */}
+      <div className="rounded-xl border border-cyan-200 dark:border-cyan-900/50 bg-cyan-50/50 dark:bg-cyan-950/20 p-4">
+        <div className="mb-3">
+          <h2 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Quick Start</h2>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">Fire a live run and watch scores stream in real time</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          {QUICK_STARTS.map((qs) => (
+            <div
+              key={qs.label}
+              className="rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 p-3 flex flex-col gap-3"
+            >
+              <div className="flex-1">
+                <div className="text-sm font-medium text-gray-800 dark:text-gray-200 leading-snug">{qs.label}</div>
+                <div className="text-xs text-gray-400 mt-1 leading-relaxed">{qs.description}</div>
+              </div>
+              <button
+                onClick={() => handleQuickStart(qs)}
+                disabled={!!launching[qs.label]}
+                className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-white text-xs px-3 py-1.5 rounded-lg transition-colors"
+              >
+                {launching[qs.label] ? 'Starting…' : 'Run Live'}
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Score trend chart */}
@@ -138,7 +202,7 @@ export default function Dashboard() {
           <h2 className="text-sm font-medium text-gray-600 dark:text-gray-400">Recent Runs</h2>
         </div>
         {runs.length === 0 ? (
-          <p className="text-sm text-gray-400 text-center py-8">No runs yet — go to Suites to start one</p>
+          <p className="text-sm text-gray-400 text-center py-8">No runs yet — use Quick Start above</p>
         ) : (
           <div className="divide-y divide-gray-200 dark:divide-gray-800">
             {runs.map(r => (
