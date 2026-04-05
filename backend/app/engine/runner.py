@@ -9,6 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
+from app.db.database import AsyncSessionLocal
 from app.engine.judge import judge_response
 from app.models.case import TestCase
 from app.models.prompt import PromptVariant
@@ -20,6 +21,8 @@ Publish = Callable[[dict], Coroutine[Any, Any, None]]
 
 
 async def execute_run(run_id: int, db: AsyncSession, publish: Publish) -> None:
+    # Use the caller-provided session only for run-level reads/writes.
+    # Each case gets its own session so concurrent commits don't collide.
     result = await db.execute(select(Run).where(Run.id == run_id))
     run = result.scalar_one()
 
@@ -88,9 +91,12 @@ async def execute_run(run_id: int, db: AsyncSession, publish: Publish) -> None:
                 reasoning=judgment.get("reasoning", ""),
                 latency_ms=latency_ms,
             )
-            db.add(run_result)
-            await db.commit()
-            await db.refresh(run_result)
+
+            # Each case writes with its own session to avoid concurrent-commit conflicts.
+            async with AsyncSessionLocal() as case_db:
+                case_db.add(run_result)
+                await case_db.commit()
+                await case_db.refresh(run_result)
 
             await publish({
                 "type": "result",
