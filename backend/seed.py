@@ -352,7 +352,7 @@ async def seed_runs(suite_ids: list[int]) -> None:
                         Run.status == "completed",
                     )
                 )
-                if existing.scalar_one_or_none():
+                if existing.scalars().first():
                     print(f"  skip (exists): suite={suite_id} model={model}")
                     continue
 
