@@ -12,7 +12,7 @@ pinned: false
 
 LLM evaluation and prompt testing dashboard. Define test cases with inputs, expected outputs, and scoring criteria — then run them against one or more Groq models simultaneously. Results are scored by an LLM-as-judge and stream live to the UI via SSE. Track pass rates and score trends over time.
 
-![CI](https://github.com/eholt723/evalboard/actions/workflows/ci.yml/badge.svg)
+![CI/CD](https://github.com/eholt723/evalboard/actions/workflows/ci.yml/badge.svg)
 
 ## Features
 
@@ -36,6 +36,7 @@ LLM evaluation and prompt testing dashboard. Define test cases with inputs, expe
 | Real-time | Server-Sent Events via sse-starlette 2.1 |
 | Validation | Pydantic 2.10, pydantic-settings 2.6 |
 | Routing | React Router 7 |
+| Testing | pytest 8.3, pytest-asyncio 0.24, aiosqlite (SQLite in-memory) |
 
 ## Project Structure
 
@@ -121,6 +122,19 @@ Browser
 | SSE Broadcaster | Fan out result events to all connected browser clients in real time |
 | SQLAlchemy / asyncpg | Async ORM layer over Neon PostgreSQL |
 | React Frontend | Render live scores, charts, and suite/prompt management UI |
+
+## Deployment
+
+Every push to `main` triggers the GitHub Actions CI/CD pipeline. If backend tests and frontend build both pass, the deploy job automatically pushes to [Hugging Face Spaces](https://eholt723-evalboard.hf.space) where it rebuilds and goes live.
+
+## Testing
+
+```bash
+cd backend
+pytest
+```
+
+37 tests covering all routers (suites, prompts, runs, dashboard). Uses SQLite in-memory via `aiosqlite` — no Postgres or Groq credentials needed.
 
 ## Local Development
 
