@@ -21,4 +21,4 @@ COPY --from=frontend-build /build/dist ./frontend/dist
 
 WORKDIR /app/backend
 EXPOSE 7860
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "7860"]
+CMD ["sh", "-c", "python seed.py && uvicorn app.main:app --host 0.0.0.0 --port 7860"]

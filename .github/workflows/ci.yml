@@ -33,6 +33,12 @@ jobs:
           GROQ_API_KEY: placeholder
           DATABASE_URL: postgresql+asyncpg://user:pass@localhost/evalboard
 
+      - name: Run tests
+        run: pytest
+        env:
+          GROQ_API_KEY: placeholder
+          DATABASE_URL: "sqlite+aiosqlite:///:memory:"
+
   frontend:
     name: Frontend lint + build
     runs-on: ubuntu-latest
