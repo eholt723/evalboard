@@ -367,8 +367,17 @@ async def seed_runs(suite_ids: list[int]) -> None:
             async def noop(event: dict) -> None:
                 pass
 
-            async with AsyncSessionLocal() as db:
+            # execute_run commits per-result internally; the concurrent commits leave
+            # the session in a state where context-manager cleanup raises. Manage
+            # lifecycle manually and suppress the benign close error.
+            db = AsyncSessionLocal()
+            try:
                 await execute_run(run_id, db, noop)
+            finally:
+                try:
+                    await db.close()
+                except Exception:
+                    pass
 
             print(f"  done:    run_id={run_id}")
 
