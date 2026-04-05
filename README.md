@@ -1,5 +1,8 @@
 ---
 title: EvalBoard
+emoji: 📊
+colorFrom: cyan
+colorTo: blue
 sdk: docker
 app_port: 7860
 pinned: false
