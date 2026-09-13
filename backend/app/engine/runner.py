@@ -59,6 +59,8 @@ async def execute_run(run_id: int, db: AsyncSession, publish: Publish) -> None:
                     model=run.model_name,
                     messages=messages,
                     temperature=0.7,
+                    reasoning_effort="low",
+                    include_reasoning=False,
                 )
                 response_text = completion.choices[0].message.content
                 latency_ms = int((time.monotonic() - start) * 1000)

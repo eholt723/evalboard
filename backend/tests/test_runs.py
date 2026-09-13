@@ -18,13 +18,13 @@ async def test_create_run(client):
     with patch("app.routers.runs._run_with_new_session", new_callable=AsyncMock):
         resp = await client.post(
             "/api/runs",
-            json={"suite_id": suite_id, "model_name": "llama-3.1-8b-instant"},
+            json={"suite_id": suite_id, "model_name": "openai/gpt-oss-20b"},
         )
 
     assert resp.status_code == 201
     data = resp.json()
     assert data["suite_id"] == suite_id
-    assert data["model_name"] == "llama-3.1-8b-instant"
+    assert data["model_name"] == "openai/gpt-oss-20b"
     assert data["status"] == "pending"
 
 
@@ -39,7 +39,7 @@ async def test_create_run_with_prompt_variant(client):
             "/api/runs",
             json={
                 "suite_id": suite_id,
-                "model_name": "llama-3.3-70b-versatile",
+                "model_name": "openai/gpt-oss-120b",
                 "prompt_variant_id": prompt_id,
             },
         )
@@ -52,7 +52,7 @@ async def test_create_run_suite_not_found(client):
     with patch("app.routers.runs._run_with_new_session", new_callable=AsyncMock):
         resp = await client.post(
             "/api/runs",
-            json={"suite_id": 9999, "model_name": "llama-3.1-8b-instant"},
+            json={"suite_id": 9999, "model_name": "openai/gpt-oss-20b"},
         )
     assert resp.status_code == 404
 
@@ -64,7 +64,7 @@ async def test_get_run(client):
         run_id = (
             await client.post(
                 "/api/runs",
-                json={"suite_id": suite_id, "model_name": "llama-3.1-8b-instant"},
+                json={"suite_id": suite_id, "model_name": "openai/gpt-oss-20b"},
             )
         ).json()["id"]
 
@@ -86,11 +86,11 @@ async def test_list_runs_returns_created(client):
     with patch("app.routers.runs._run_with_new_session", new_callable=AsyncMock):
         await client.post(
             "/api/runs",
-            json={"suite_id": suite_id, "model_name": "llama-3.1-8b-instant"},
+            json={"suite_id": suite_id, "model_name": "openai/gpt-oss-20b"},
         )
         await client.post(
             "/api/runs",
-            json={"suite_id": suite_id, "model_name": "llama-3.3-70b-versatile"},
+            json={"suite_id": suite_id, "model_name": "openai/gpt-oss-120b"},
         )
 
     resp = await client.get("/api/runs")

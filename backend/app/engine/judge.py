@@ -4,7 +4,7 @@ from groq import AsyncGroq
 
 from app.config import settings
 
-JUDGE_MODEL = "llama-3.3-70b-versatile"
+JUDGE_MODEL = "openai/gpt-oss-120b"
 JUDGE_TEMPERATURE = 0.1
 
 JUDGE_PROMPT = """\
@@ -37,6 +37,8 @@ async def judge_response(input: str, expected: str, criteria: str, response: str
         model=JUDGE_MODEL,
         temperature=JUDGE_TEMPERATURE,
         messages=[{"role": "user", "content": prompt}],
+        reasoning_effort="low",
+        include_reasoning=False,
     )
     raw = completion.choices[0].message.content.strip()
 

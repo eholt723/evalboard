@@ -29,8 +29,8 @@ LLM evaluation and prompt testing dashboard. Define test cases with inputs, expe
 |---|---|
 | Backend | Python 3, FastAPI 0.115, Uvicorn 0.32 |
 | Frontend | React 19, Vite 8, Tailwind CSS 4, Recharts 3 |
-| LLM Inference | Groq SDK 0.12 (llama-3.1-8b-instant, llama-3.3-70b-versatile) |
-| LLM Judge | Groq — llama-3.3-70b-versatile at temperature 0.1 |
+| LLM Inference | Groq SDK 0.12 (openai/gpt-oss-20b, openai/gpt-oss-120b) |
+| LLM Judge | Groq — openai/gpt-oss-120b at temperature 0.1 |
 | Database | PostgreSQL (Neon serverless), SQLAlchemy 2 async, asyncpg 0.30 |
 | Migrations | Alembic 1.14 |
 | Real-time | Server-Sent Events via sse-starlette 2.1 |

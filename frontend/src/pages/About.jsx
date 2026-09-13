@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 
 const steps = [
   { n: 1, title: 'Define Test Cases', desc: 'Write a prompt input, what a good response should include, and how to judge it — factual accuracy, tone, completeness, whatever matters for your use case.' },
-  { n: 2, title: 'Choose Models', desc: 'Pick one or two LLMs to run against the suite. EvalBoard supports any model available on Groq — llama-3.1-8b-instant, llama-3.3-70b-versatile, and more.' },
+  { n: 2, title: 'Choose Models', desc: 'Pick one or two LLMs to run against the suite. EvalBoard supports any model available on Groq — openai/gpt-oss-20b, openai/gpt-oss-120b, and more.' },
   { n: 3, title: 'Run in Parallel', desc: 'All test cases execute simultaneously using asyncio with a concurrency semaphore. Results stream to your screen live as each one finishes.' },
   { n: 4, title: 'Score with an LLM Judge', desc: 'A second Groq call evaluates each response against the expected output and criteria, returning a 1–10 score, pass/fail, strengths, weaknesses, and reasoning.' },
   { n: 5, title: 'Track Over Time', desc: 'The dashboard plots score trends across runs, ranks models by average score and pass rate, and lets you do side-by-side comparisons of any two runs.' },
@@ -76,7 +76,7 @@ export default function About() {
           EvalBoard is a tool for measuring LLM quality in a repeatable, structured way. You define test cases with expected outputs and scoring criteria, run them against one or more models, and watch scores populate live as results stream in. The judge — a separate LLM call — tells you not just whether a response passed, but exactly why it did or didn't.
         </p>
         <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-          The core demo: the same 10 test cases run against <span className="font-mono text-sm text-cyan-600 dark:text-cyan-400">llama-3.1-8b-instant</span> and <span className="font-mono text-sm text-cyan-600 dark:text-cyan-400">llama-3.3-70b-versatile</span> simultaneously. See where the smaller model underperforms and why.
+          The core demo: the same 10 test cases run against <span className="font-mono text-sm text-cyan-600 dark:text-cyan-400">openai/gpt-oss-20b</span> and <span className="font-mono text-sm text-cyan-600 dark:text-cyan-400">openai/gpt-oss-120b</span> simultaneously. See where the smaller model underperforms and why.
         </p>
       </section>
 

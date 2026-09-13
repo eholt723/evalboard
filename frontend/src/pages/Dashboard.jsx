@@ -17,28 +17,28 @@ function PassRate({ rate }) {
 }
 
 const MODEL_COLORS = {
-  'llama-3.1-8b-instant': '#06b6d4',
-  'llama-3.3-70b-versatile': '#8b5cf6',
+  'openai/gpt-oss-20b': '#06b6d4',
+  'openai/gpt-oss-120b': '#8b5cf6',
 }
 const FALLBACK_COLORS = ['#06b6d4', '#8b5cf6', '#f59e0b', '#10b981']
 
 const QUICK_STARTS = [
   {
-    label: 'Customer Support — Llama 8B',
+    label: 'Customer Support — GPT-OSS 20B',
     suite: 'Customer Support Quality',
-    model: 'llama-3.1-8b-instant',
+    model: 'openai/gpt-oss-20b',
     description: '8 customer service scenarios scored live against the smaller model',
   },
   {
-    label: 'Customer Support — Llama 70B',
+    label: 'Customer Support — GPT-OSS 120B',
     suite: 'Customer Support Quality',
-    model: 'llama-3.3-70b-versatile',
-    description: 'Same 8 cases against the 70B — watch the score gap open up',
+    model: 'openai/gpt-oss-120b',
+    description: 'Same 8 cases against the 120B — watch the score gap open up',
   },
   {
-    label: 'Code Review — Llama 70B',
+    label: 'Code Review — GPT-OSS 120B',
     suite: 'Code Review Accuracy',
-    model: 'llama-3.3-70b-versatile',
+    model: 'openai/gpt-oss-120b',
     description: 'SQL injection, resource leaks, hardcoded secrets — does it catch them?',
   },
 ]

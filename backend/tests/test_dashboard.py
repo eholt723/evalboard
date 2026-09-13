@@ -22,14 +22,14 @@ async def _seed(db):
 
     run_a = Run(
         suite_id=suite.id,
-        model_name="llama-3.1-8b-instant",
+        model_name="openai/gpt-oss-20b",
         status="completed",
         started_at=now,
         completed_at=now,
     )
     run_b = Run(
         suite_id=suite.id,
-        model_name="llama-3.3-70b-versatile",
+        model_name="openai/gpt-oss-120b",
         status="completed",
         started_at=now,
         completed_at=now,
@@ -95,7 +95,7 @@ async def test_leaderboard_order(client, db):
     assert len(data) == 2
     # higher avg_score should come first
     assert data[0]["avg_score"] > data[1]["avg_score"]
-    assert data[0]["model_name"] == "llama-3.3-70b-versatile"
+    assert data[0]["model_name"] == "openai/gpt-oss-120b"
 
 
 async def test_score_trends_chronological(client, db):
@@ -127,8 +127,8 @@ async def test_compare_runs(client, db):
     resp = await client.get(f"/api/dashboard/compare/{run_a.id}/{run_b.id}")
     assert resp.status_code == 200
     data = resp.json()
-    assert data["run_a"]["model_name"] == "llama-3.1-8b-instant"
-    assert data["run_b"]["model_name"] == "llama-3.3-70b-versatile"
+    assert data["run_a"]["model_name"] == "openai/gpt-oss-20b"
+    assert data["run_b"]["model_name"] == "openai/gpt-oss-120b"
     assert len(data["cases"]) == 1
     assert data["cases"][0]["score_diff"] == 2  # 9 - 7
 

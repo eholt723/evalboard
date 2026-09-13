@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { getSuite, addCase, deleteCase, createRun, getRuns } from '../lib/api'
 
-const MODELS = ['llama-3.1-8b-instant', 'llama-3.3-70b-versatile']
+const MODELS = ['openai/gpt-oss-20b', 'openai/gpt-oss-120b']
 
 export default function SuiteDetail() {
   const { id } = useParams()
