@@ -25,6 +25,10 @@ Return ONLY valid JSON with this exact structure:
 }}"""
 
 
+class JudgeParseError(ValueError):
+    """Raised when the judge model's output can't be parsed as the expected JSON schema."""
+
+
 async def judge_response(input: str, expected: str, criteria: str, response: str) -> dict:
     client = AsyncGroq(api_key=settings.groq_api_key)
     prompt = JUDGE_PROMPT.format(
@@ -42,8 +46,25 @@ async def judge_response(input: str, expected: str, criteria: str, response: str
     )
     raw = completion.choices[0].message.content.strip()
 
-    # strip markdown code fences if present
-    raw = re.sub(r"^```(?:json)?\s*", "", raw)
-    raw = re.sub(r"\s*```$", "", raw)
+    # gpt-oss sometimes wraps the JSON in commentary or code fences despite the
+    # "return ONLY valid JSON" instruction — pull out the outermost {...} object
+    # rather than assuming the whole trimmed string is valid JSON.
+    match = re.search(r"\{.*\}", raw, re.DOTALL)
+    if not match:
+        raise JudgeParseError(f"Judge response contained no JSON object: {raw[:200]!r}")
 
-    return json.loads(raw)
+    try:
+        parsed = json.loads(match.group(0))
+    except json.JSONDecodeError as exc:
+        raise JudgeParseError(f"Judge response was not valid JSON: {exc}") from exc
+
+    if "score" not in parsed:
+        raise JudgeParseError(f"Judge response missing required 'score' field: {parsed!r}")
+
+    return {
+        "score": parsed["score"],
+        "pass": bool(parsed.get("pass", False)),
+        "strengths": parsed.get("strengths", []),
+        "weaknesses": parsed.get("weaknesses", []),
+        "reasoning": parsed.get("reasoning", ""),
+    }
