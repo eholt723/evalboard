@@ -54,6 +54,7 @@ async def execute_run(run_id: int, db: AsyncSession, publish: Publish) -> None:
             messages.append({"role": "user", "content": case.input})
 
             start = time.monotonic()
+            response_text = None
             try:
                 completion = await client.chat.completions.create(
                     model=run.model_name,
@@ -63,24 +64,35 @@ async def execute_run(run_id: int, db: AsyncSession, publish: Publish) -> None:
                     include_reasoning=False,
                 )
                 response_text = completion.choices[0].message.content
-                latency_ms = int((time.monotonic() - start) * 1000)
-
-                judgment = await judge_response(
-                    input=case.input,
-                    expected=case.expected,
-                    criteria=case.criteria,
-                    response=response_text,
-                )
             except Exception as exc:
-                response_text = None
                 latency_ms = int((time.monotonic() - start) * 1000)
                 judgment = {
                     "score": 0,
                     "pass": False,
                     "strengths": [],
                     "weaknesses": [str(exc)],
-                    "reasoning": f"Error during inference or judging: {exc}",
+                    "reasoning": f"Error during inference: {exc}",
                 }
+            else:
+                latency_ms = int((time.monotonic() - start) * 1000)
+                try:
+                    judgment = await judge_response(
+                        input=case.input,
+                        expected=case.expected,
+                        criteria=case.criteria,
+                        response=response_text,
+                    )
+                except Exception as exc:
+                    # The model under test responded fine — keep response_text — the
+                    # judge itself failed to produce a usable verdict (e.g. gpt-oss
+                    # returned non-JSON output). Don't score this as a failed response.
+                    judgment = {
+                        "score": None,
+                        "pass": None,
+                        "strengths": [],
+                        "weaknesses": [],
+                        "reasoning": f"Response generated but judging failed: {exc}",
+                    }
 
             run_result = RunResult(
                 run_id=run_id,
